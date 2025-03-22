@@ -1,5 +1,5 @@
 import {
-  Appearance,
+  useColorScheme,
   type ColorValue,
   type ImageStyle,
   type TextStyle,
@@ -39,18 +39,17 @@ const difference = <T>(variant: Set<T>, base: Set<T>): Set<T> => {
   return result;
 };
 
-const createUseMixin = <T extends string>(
+export const createUseMixins = <T extends string>(
   mixins: Record<T, Mixin>,
   delimeter: string = "_",
 ) => {
   const mixinKeys = new Set(Object.keys(mixins));
   return <K extends string, S extends object>(styles: Record<K, S>) => {
-    const colorScheme = Appearance.getColorScheme();
+    const colorScheme = useColorScheme();
     return (Object.entries<S>(styles) as [K, S][]).reduce(
       (result, [key, style]) => {
         const [base, ...appliedMixinKeysArray] = key.split(delimeter);
         const appliedMixinKeysSet = new Set(appliedMixinKeysArray);
-        // if (appliedMixinKeysSet.difference(mixinKeys).size === 0) {
         if (difference(appliedMixinKeysSet, mixinKeys).size === 0) {
           if (base in result) {
             throw new Error(`Key duplicate: ${base}`);
@@ -88,8 +87,3 @@ const createUseMixin = <T extends string>(
     );
   };
 };
-
-export const useMixin = createUseMixin({
-  bgc: { backgroundColor: { dark: "#111", light: "#ccc" } },
-  tc: { color: { dark: "#000", light: "#fff" } },
-});
