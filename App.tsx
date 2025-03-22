@@ -1,6 +1,6 @@
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import Button from "./button";
-import { useMixins } from "./src/react-native-style-suffixes/useMixins";
+import { useMixins } from "./useMixins";
 
 export default function App() {
   const colorScheme = useColorScheme();

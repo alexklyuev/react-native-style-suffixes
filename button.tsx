@@ -7,7 +7,7 @@ import {
   useColorScheme,
   Appearance,
 } from "react-native";
-import { useMixins } from "./src/react-native-style-suffixes/useMixins";
+import { useMixins } from "./useMixins";
 
 const Button: FC = () => {
   const colorScheme = useColorScheme();
@@ -35,7 +35,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 0.25,
     borderColor: "#111",
-    textAlign: "center",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

@@ -1,10 +1,16 @@
 import {
+  StyleProp,
   useColorScheme,
   type ColorValue,
   type ImageStyle,
   type TextStyle,
   type ViewStyle,
 } from "react-native";
+
+type StyleProps =
+  | StyleProp<ViewStyle>
+  | StyleProp<TextStyle>
+  | StyleProp<ImageStyle>;
 
 type ThemeKeys = "light" | "dark" | "default";
 
@@ -39,25 +45,35 @@ const difference = <T>(variant: Set<T>, base: Set<T>): Set<T> => {
   return result;
 };
 
-export const createUseMixins = <T extends string>(
-  mixins: Record<T, Mixin>,
-  delimeter: string = "_",
+export const createUseMixins = <MixinKeys extends string>(
+  mixins: Record<MixinKeys, Mixin>,
+  { delimeter }: { delimeter: string } = { delimeter: "_" },
 ) => {
   const mixinKeys = new Set(Object.keys(mixins));
-  return <K extends string, S extends object>(styles: Record<K, S>) => {
+  return <
+    RawStyleKey extends string,
+    StyleValue extends ViewStyle | TextStyle | ImageStyle,
+  >(
+    styles: Record<RawStyleKey, StyleValue>,
+  ) => {
     const colorScheme = useColorScheme();
-    return (Object.entries<S>(styles) as [K, S][]).reduce(
+    return (
+      Object.entries<StyleValue>(styles) as [RawStyleKey, StyleValue][]
+    ).reduce(
       (result, [key, style]) => {
         const [base, ...appliedMixinKeysArray] = key.split(delimeter);
+        if (base === "") {
+          throw new Error("Cleaned style name is empty");
+        }
         const appliedMixinKeysSet = new Set(appliedMixinKeysArray);
         if (difference(appliedMixinKeysSet, mixinKeys).size === 0) {
           if (base in result) {
-            throw new Error(`Key duplicate: ${base}`);
+            throw new Error(`Cleaned style name duplicate: ${base}`);
           }
           Object.assign(result, {
             [base]: {
               ...style,
-              ...(appliedMixinKeysArray as T[]).reduce(
+              ...(appliedMixinKeysArray as MixinKeys[]).reduce(
                 (mixinsStyles, mixinKey) => {
                   return Object.assign(
                     mixinsStyles,
@@ -77,13 +93,16 @@ export const createUseMixins = <T extends string>(
           });
         } else {
           if (key in result) {
-            throw new Error(`Key duplicate: ${key}`);
+            throw new Error(`Raw style name duplicate: ${key}`);
           }
           Object.assign(result, { [key]: style });
         }
         return result;
       },
-      {} as Record<CleanKeys<typeof delimeter, T, K>, S>,
+      {} as Record<
+        CleanKeys<typeof delimeter, MixinKeys, RawStyleKey>,
+        StyleProps
+      >,
     );
   };
 };

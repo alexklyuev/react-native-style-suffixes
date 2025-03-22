@@ -1,4 +1,4 @@
-import { createUseMixins } from ".";
+import { createUseMixins } from "./src/react-native-style-suffixes";
 
 export const useMixins = createUseMixins({
   bg: { backgroundColor: { dark: "#000", light: "#fff" } },
