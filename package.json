@@ -1,6 +1,6 @@
 {
   "name": "react-native-style-suffixes",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -17,7 +17,11 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "^8.0.1",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "prettier": "^3.5.3",
     "typescript": "^5.3.3"
-  },
-  "private": true
+  }
 }
