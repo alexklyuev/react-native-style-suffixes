@@ -1,6 +1,7 @@
 import {
-  StyleProp,
+  Appearance,
   useColorScheme,
+  type StyleProp,
   type ColorValue,
   type ImageStyle,
   type TextStyle,
@@ -12,7 +13,7 @@ type StyleProps =
   | StyleProp<TextStyle>
   | StyleProp<ImageStyle>;
 
-type ThemeKeys = "light" | "dark" | "default";
+type ThemeKeys = "light" | "dark";
 
 type MixinOfView<ViewType extends object> = {
   [StyleName in keyof ViewType]: NonNullable<
@@ -51,14 +52,14 @@ export const createUseMixins = <MixinKeys extends string>(
 ) => {
   const mixinKeys = new Set(Object.keys(mixins));
   return <
-    RawStyleKey extends string,
+    RawStyleKeys extends string,
     StyleValue extends ViewStyle | TextStyle | ImageStyle,
   >(
-    styles: Record<RawStyleKey, StyleValue>,
+    styles: Record<RawStyleKeys, StyleValue>,
   ) => {
     const colorScheme = useColorScheme();
     return (
-      Object.entries<StyleValue>(styles) as [RawStyleKey, StyleValue][]
+      Object.entries<StyleValue>(styles) as [RawStyleKeys, StyleValue][]
     ).reduce(
       (result, [key, style]) => {
         const [base, ...appliedMixinKeysArray] = key.split(delimeter);
@@ -100,9 +101,71 @@ export const createUseMixins = <MixinKeys extends string>(
         return result;
       },
       {} as Record<
-        CleanKeys<typeof delimeter, MixinKeys, RawStyleKey>,
+        CleanKeys<typeof delimeter, MixinKeys, RawStyleKeys>,
         StyleProps
       >,
     );
+  };
+};
+
+export const getSeparateKeysGlobal = <
+  Name extends string,
+  Delimeter extends string,
+  MixinKeys extends string,
+  R = [CleanKeys<Delimeter, MixinKeys, Name>, MixinKeys[]],
+>(
+  name: Name,
+  delimeter: Delimeter,
+  mixinKeysSet: Set<MixinKeys>,
+): R => {
+  const [base, ...possibleMixinKeys] = name.split(delimeter);
+  const possibleMixinKeysSet = new Set(possibleMixinKeys);
+  if (difference(possibleMixinKeysSet, mixinKeysSet).size > 0) {
+    return [name, []] as unknown as R;
+  } else {
+    return [base, possibleMixinKeys] as R;
+  }
+};
+
+export const createWithMixins = <MixinKeys extends string>(
+  mixins: Record<MixinKeys, Mixin>,
+  { delimeter }: { delimeter: string } = { delimeter: "_" },
+) => {
+  const mixinKeysSet = new Set(Object.keys(mixins));
+  return <
+    RawStyleKeys extends string,
+    StyleValue extends ViewStyle | TextStyle | ImageStyle,
+    CK extends string = CleanKeys<typeof delimeter, MixinKeys, RawStyleKeys>,
+  >(
+    styles: Record<RawStyleKeys, StyleValue>,
+  ): Record<CK, StyleProps> => {
+    const applicationMap = new Map<CK, [RawStyleKeys, MixinKeys[]]>();
+    const originalStyleKeys = new Set<RawStyleKeys>(
+      Object.keys(styles) as RawStyleKeys[],
+    );
+    originalStyleKeys.forEach((originalKey: RawStyleKeys) => {
+      const [cleanKey, appliedMixins]: [CK, MixinKeys[]] =
+        getSeparateKeysGlobal(originalKey, delimeter, mixinKeysSet);
+      applicationMap.set(cleanKey, [originalKey, appliedMixins]);
+    });
+    return new Proxy(
+      {},
+      {
+        get: (_t, cleanKey: CK) => {
+          const [originalKey, appliedMixinsKeys] =
+            applicationMap.get(cleanKey)!;
+          const style = styles[originalKey];
+          const colorScheme = Appearance.getColorScheme();
+          if (colorScheme) {
+            appliedMixinsKeys
+              .map((key) => mixins[key])
+              .reduce((st, _mixin) => {
+                return st;
+              }, style);
+          }
+          return style;
+        },
+      },
+    ) as Record<CK, StyleProps>;
   };
 };
