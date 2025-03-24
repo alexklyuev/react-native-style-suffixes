@@ -7,7 +7,7 @@ import {
   useColorScheme,
   Appearance,
 } from "react-native";
-import { useMixins } from "./useMixins";
+import { withMixins } from "./withMixins";
 
 const Button: FC = () => {
   const colorScheme = useColorScheme();
@@ -15,8 +15,6 @@ const Button: FC = () => {
   const changeColorScheme = useCallback(() => {
     Appearance.setColorScheme(colorScheme === "dark" ? "light" : "dark");
   }, [colorScheme]);
-
-  const styles_ = useMixins(styles);
 
   return (
     <TouchableOpacity onPress={changeColorScheme}>
@@ -28,21 +26,23 @@ const Button: FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container_backgroundInvert: {
-    paddingHorizontal: 25,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 0.25,
-    borderColor: "#111",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text_textInvert: {},
-  subtext: {
-    color: "lightgreen",
-  },
-});
+const styles_ = withMixins(
+  StyleSheet.create({
+    container_backgroundInvert: {
+      paddingHorizontal: 25,
+      paddingVertical: 10,
+      borderRadius: 10,
+      borderWidth: 0.25,
+      borderColor: "#111",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    text_textInvert: {},
+    subtext: {
+      color: "lightgreen",
+    },
+  }),
+);
 
 export default Button;

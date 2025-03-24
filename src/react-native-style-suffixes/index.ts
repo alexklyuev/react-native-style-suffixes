@@ -154,13 +154,20 @@ export const createWithMixins = <MixinKeys extends string>(
         get: (_t, cleanKey: CK) => {
           const [originalKey, appliedMixinsKeys] =
             applicationMap.get(cleanKey)!;
-          const style = styles[originalKey];
+          const style = { ...styles[originalKey] };
           const colorScheme = Appearance.getColorScheme();
           if (colorScheme) {
             appliedMixinsKeys
               .map((key) => mixins[key])
-              .reduce((st, _mixin) => {
-                return st;
+              .reduce((st, mixin) => {
+                return Object.entries(mixin).reduce(
+                  (styleResult, [styleName, themeVariants]) => {
+                    return Object.assign(styleResult, {
+                      [styleName]: themeVariants[colorScheme],
+                    });
+                  },
+                  st,
+                );
               }, style);
           }
           return style;
