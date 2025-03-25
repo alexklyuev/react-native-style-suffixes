@@ -1,7 +1,7 @@
 {
   "name": "react-native-style-suffixes",
   "version": "0.1.0",
-  "main": "index.ts",
+  "main": "exports/index.mjs",
   "types": "exports/index.d.mts",
   "exports": {
     ".": "./exports/index.mjs"
