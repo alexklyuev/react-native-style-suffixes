@@ -1,10 +1,10 @@
 {
   "name": "react-native-style-suffixes",
   "version": "0.1.0",
-  "main": "dist/index.mjs",
-  "types": "dist/index.d.mts",
+  "main": "index.ts",
+  "types": "exports/index.d.mts",
   "exports": {
-    ".": "./dist/index.mjs"
+    ".": "./exports/index.mjs"
   },
   "scripts": {
     "start": "expo start",
