@@ -32,7 +32,7 @@ type CleanKeys<
   Delimeter extends string,
   MixinKeys extends string,
   StylesKeys extends string,
-> = StylesKeys extends `${infer IntermediateKeys}_${MixinKeys}`
+> = StylesKeys extends `${infer IntermediateKeys}${Delimeter}${MixinKeys}`
   ? CleanKeys<Delimeter, MixinKeys, IntermediateKeys>
   : StylesKeys;
 
@@ -46,9 +46,12 @@ const difference = <T>(variant: Set<T>, base: Set<T>): Set<T> => {
   return result;
 };
 
-export const createUseMixins = <MixinKeys extends string>(
+export const createUseMixins = <
+  MixinKeys extends string,
+  Delimeter extends string,
+>(
   mixins: Record<MixinKeys, Mixin>,
-  { delimeter }: { delimeter: string } = { delimeter: "_" },
+  { delimeter }: { delimeter: Delimeter },
 ) => {
   const mixinKeys = new Set(Object.keys(mixins));
   return <
@@ -100,10 +103,7 @@ export const createUseMixins = <MixinKeys extends string>(
         }
         return result;
       },
-      {} as Record<
-        CleanKeys<typeof delimeter, MixinKeys, RawStyleKeys>,
-        StyleProps
-      >,
+      {} as Record<CleanKeys<Delimeter, MixinKeys, RawStyleKeys>, StyleProps>,
     );
   };
 };
@@ -127,15 +127,18 @@ export const getSeparateKeysGlobal = <
   }
 };
 
-export const createWithMixins = <MixinKeys extends string>(
+export const createWithMixins = <
+  MixinKeys extends string,
+  Delimeter extends string,
+>(
   mixins: Record<MixinKeys, Mixin>,
-  { delimeter }: { delimeter: string } = { delimeter: "_" },
+  { delimeter }: { delimeter: Delimeter },
 ) => {
   const mixinKeysSet = new Set(Object.keys(mixins));
   return <
     RawStyleKeys extends string,
     StyleValue extends ViewStyle | TextStyle | ImageStyle,
-    CK extends string = CleanKeys<typeof delimeter, MixinKeys, RawStyleKeys>,
+    CK extends string = CleanKeys<Delimeter, MixinKeys, RawStyleKeys>,
   >(
     styles: Record<RawStyleKeys, StyleValue>,
   ): Record<CK, StyleProps> => {
