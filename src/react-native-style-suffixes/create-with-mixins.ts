@@ -58,31 +58,34 @@ export const createWithMixinsInternal = <
         getSeparateKeysGlobal(originalKey, delimeter, mixinKeysSet);
       applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
-    return new Proxy(
-      {},
-      {
-        get: (_t, cleanKey: CK) => {
-          const [originalKey, appliedMixinsKeys] =
-            applicationMap.get(cleanKey)!;
-          const style = { ...styles[originalKey] };
-          const colorScheme = getColorScheme();
-          if (colorScheme) {
-            appliedMixinsKeys
-              .map((key) => mixins[key])
-              .reduce((st, mixin) => {
-                return Object.entries(mixin).reduce(
-                  (styleResult, [styleName, themeVariants]) => {
-                    return Object.assign(styleResult, {
-                      [styleName]: themeVariants[colorScheme],
-                    });
-                  },
-                  st,
-                );
-              }, style);
-          }
-          return style;
-        },
+    const proxyfiedObject = Array.from(applicationMap).reduce(
+      (po, item) => {
+        po[item[0]] = null;
+        return po;
       },
-    ) as Record<CK, StyleProps>;
+      {} as Record<CK, StyleProps>,
+    );
+    return new Proxy(proxyfiedObject, {
+      get: (_t, cleanKey: CK) => {
+        const [originalKey, appliedMixinsKeys] = applicationMap.get(cleanKey)!;
+        const style = { ...styles[originalKey] };
+        const colorScheme = getColorScheme();
+        if (colorScheme) {
+          appliedMixinsKeys
+            .map((key) => mixins[key])
+            .reduce((st, mixin) => {
+              return Object.entries(mixin).reduce(
+                (styleResult, [styleName, themeVariants]) => {
+                  return Object.assign(styleResult, {
+                    [styleName]: themeVariants[colorScheme],
+                  });
+                },
+                st,
+              );
+            }, style);
+        }
+        return style;
+      },
+    }) as Record<CK, StyleProps>;
   };
 };
