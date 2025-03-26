@@ -1,4 +1,4 @@
-import { createUseMixins } from "./src/react-native-style-suffixes";
+import { createUseMixins } from "./src/react-native-style-suffixes/create-use-mixins";
 
 export const useMixins = createUseMixins(
   {
