@@ -8,7 +8,7 @@ import {
 import type { CleanKeys, Mixin, StyleProps } from "./types";
 import { difference } from "./utils";
 
-export const getSeparateKeysGlobal = <
+export const separateKeys = <
   Name extends string,
   Delimeter extends string,
   MixinKeys extends string,
@@ -19,9 +19,12 @@ export const getSeparateKeysGlobal = <
   mixinKeysSet: Set<MixinKeys>,
 ): R => {
   const [base, ...possibleMixinKeys] = name.split(delimeter);
+  if (!base) {
+    throw new Error("Style suffixes: base could not be empty");
+  }
   const possibleMixinKeysSet = new Set(possibleMixinKeys);
   if (difference(possibleMixinKeysSet, mixinKeysSet).size > 0) {
-    return [name, []] as unknown as R;
+    throw new Error("Style suffixes: unknown/misspeled mixin key");
   } else {
     return [base, possibleMixinKeys] as R;
   }
@@ -54,8 +57,14 @@ export const createWithMixinsInternal = <
       Object.keys(styles) as RawStyleKeys[],
     );
     originalStyleKeys.forEach((originalKey: RawStyleKeys) => {
-      const [cleanKey, appliedMixins]: [CK, MixinKeys[]] =
-        getSeparateKeysGlobal(originalKey, delimeter, mixinKeysSet);
+      const [cleanKey, appliedMixins]: [CK, MixinKeys[]] = separateKeys(
+        originalKey,
+        delimeter,
+        mixinKeysSet,
+      );
+      if (applicationMap.has(cleanKey)) {
+        throw new Error("Style suffixes: duplicating base key");
+      }
       applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
     const proxyfiedObject = Array.from(applicationMap).reduce(

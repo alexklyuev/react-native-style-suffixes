@@ -69,10 +69,10 @@ const styles = withMixins(StyleSheet.create({
 
 ## Behavior ##
 
-### Misspelled suffixes ###
-If even one suffix is misspelled, style key will be left untouched, even if it has other suffixes which are spelled right.
-
-Later this behavior could be made configurable in settings.
+### Errors ###
+- If base name, cleaned of suffixes, is empty, error would be thrown.
+- If two or more base names, cleaned of suffixes, are equal, error would be thrown.
+- If even one suffix in style name is misspelled, error would be thrown.
 
 ## Known Issues ##
 - you can apply text style property to a `View` and you won`t get typescript error

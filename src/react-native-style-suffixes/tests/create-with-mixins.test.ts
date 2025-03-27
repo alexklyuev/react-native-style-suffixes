@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { createWithMixins } from "..";
+import { separateKeys } from "../create-with-mixins";
 
 describe("Style application with given theme", () => {
 
@@ -45,4 +46,52 @@ describe("Style application with given theme", () => {
     expect(mixedKeys.includes("fancyText")).toBe(true);
     expect(mixedKeys.includes("notModified")).toBe(true);
   })
+});
+
+describe("Separating base keys and mixins keys", () => {
+  test("Separating function", () => {
+    const result = separateKeys("base_m1_m2", "_", new Set(["m1", "m2"]));
+    expect(result[0]).toBe("base");
+    expect(result[1].length).toBe(2);
+    expect(result[1].includes("m1")).toBe(true);
+    expect(result[1].includes("m2")).toBe(true);
+  });
+});
+
+describe("Errors", () => {
+  test("Error from empty base key", () => {
+    expect(() => separateKeys("_m1_m2", "_", new Set(["m1", "m2"]))).toThrow();
+  });
+  test("Duplicating base keys error", () => {
+    expect(() => {
+      createWithMixins(
+        {
+          m1: { color: { dark: "#000", light: "#fff" } },
+          m2: { color: { dark: "#000", light: "#fff" } },
+       },
+       { delimeter: "_" },
+       () => "light",
+      )(
+        {
+          base_m1: {},
+          base_m2: {},
+        }
+      )
+    }).toThrow();
+  });
+  test("Misspeled/unknown mixin suffixes error", () => {
+    expect(() => {
+      createWithMixins(
+        {
+          m1: { color: { dark: "#000", light: "#fff" } },
+        },
+        { delimeter: "_" },
+        () => "light",
+      )(
+        {
+          base_m3: {},
+        }
+      )
+    }).toThrow();
+  });
 });
