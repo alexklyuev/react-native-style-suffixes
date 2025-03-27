@@ -15,11 +15,14 @@ var difference = (variant, base) => {
 };
 
 // src/react-native-style-suffixes/create-with-mixins.ts
-var getSeparateKeysGlobal = (name, delimeter, mixinKeysSet) => {
+var separateKeys = (name, delimeter, mixinKeysSet) => {
   const [base, ...possibleMixinKeys] = name.split(delimeter);
+  if (!base) {
+    throw new Error("Style suffixes: base could not be empty");
+  }
   const possibleMixinKeysSet = new Set(possibleMixinKeys);
   if (difference(possibleMixinKeysSet, mixinKeysSet).size > 0) {
-    return [name, []];
+    throw new Error("Style suffixes: unknown/misspeled mixin key");
   } else {
     return [base, possibleMixinKeys];
   }
@@ -32,7 +35,14 @@ var createWithMixinsInternal = (mixins, { delimeter }, getColorScheme = Appearan
       Object.keys(styles)
     );
     originalStyleKeys.forEach((originalKey) => {
-      const [cleanKey, appliedMixins] = getSeparateKeysGlobal(originalKey, delimeter, mixinKeysSet);
+      const [cleanKey, appliedMixins] = separateKeys(
+        originalKey,
+        delimeter,
+        mixinKeysSet
+      );
+      if (applicationMap.has(cleanKey)) {
+        throw new Error("Style suffixes: duplicating base key");
+      }
       applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
     const proxyfiedObject = Array.from(applicationMap).reduce(
