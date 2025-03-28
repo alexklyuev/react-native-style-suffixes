@@ -26,17 +26,19 @@ export class MixinsContainer<MixinKeys extends string> {
 
 export class StylesMixer<
   MixinKeys extends string,
-  Delimeter extends string,
   RawStyleKeys extends string,
+  Delimeter extends string = "_",
   CK extends string = CleanKeys<Delimeter, MixinKeys, RawStyleKeys>,
 > {
   private applicationMap = new Map<CK, [RawStyleKeys, MixinKeys[]]>();
+  private delimeter: Delimeter = "_" as Delimeter;
+  private getColorScheme: () => ColorSchemeName = Appearance.getColorScheme;
 
   constructor(
     private mixins: MixinsContainer<MixinKeys>,
     private styles: Record<RawStyleKeys, ViewStyle | TextStyle | ImageStyle>,
-    private delimeter: Delimeter,
-    private getColorScheme: () => ColorSchemeName = Appearance.getColorScheme,
+    delimeter?: Delimeter,
+    getColorScheme?: () => ColorSchemeName,
   ) {
     const originalStyleKeys = new Set<RawStyleKeys>(
       Object.keys(styles) as RawStyleKeys[],
@@ -49,6 +51,12 @@ export class StylesMixer<
       }
       this.applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
+    if (delimeter) {
+      this.delimeter = delimeter;
+    }
+    if (getColorScheme) {
+      this.getColorScheme = getColorScheme;
+    }
   }
 
   private separateKeys<

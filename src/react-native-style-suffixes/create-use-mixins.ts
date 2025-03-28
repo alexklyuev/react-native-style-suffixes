@@ -2,6 +2,9 @@ import { ViewStyle, TextStyle, ImageStyle, useColorScheme } from "react-native";
 import { CleanKeys, Mixin, StyleProps } from "./types";
 import { difference } from "./utils";
 
+/**
+ * @deprecated use implementation with classes
+ */
 export const createUseMixins = <
   MixinKeys extends string,
   Delimeter extends string,

@@ -30,6 +30,9 @@ export const separateKeys = <
   }
 };
 
+/**
+ * @deprecated use implementation with classes
+ */
 export const createWithMixinsInternal = <
   MixinKeys extends string,
   Delimeter extends string,

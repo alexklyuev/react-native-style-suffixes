@@ -3,7 +3,6 @@ import { createWithMixins } from "..";
 import { separateKeys } from "../create-with-mixins";
 
 describe("Style application with given theme", () => {
-
   const delimeter = "_";
 
   const withMixins = createWithMixins(
@@ -12,9 +11,9 @@ describe("Style application with given theme", () => {
       bgi: { backgroundColor: { dark: "#fff", light: "#000" } },
       t: { color: { dark: "#fff", light: "#000" } },
       ti: { color: { dark: "#000", light: "#fff" } },
-      td: { textDecorationColor: {dark: "#aaa", light: "#222"}}
+      td: { textDecorationColor: { dark: "#aaa", light: "#222" } },
     },
-    { delimeter },
+    delimeter,
     () => "light",
   );
 
@@ -29,7 +28,7 @@ describe("Style application with given theme", () => {
   test("Result values with one suffix", () => {
     expect(mixedStyles.background.backgroundColor).toBe("#fff");
   });
-  
+
   test("Result value with two suffixes", () => {
     expect(mixedStyles.fancyText.color).toBe("#000");
     expect(mixedStyles.fancyText.textDecorationColor).toBe("#222");
@@ -45,7 +44,7 @@ describe("Style application with given theme", () => {
     expect(mixedKeys.includes("background")).toBe(true);
     expect(mixedKeys.includes("fancyText")).toBe(true);
     expect(mixedKeys.includes("notModified")).toBe(true);
-  })
+  });
 });
 
 describe("Separating base keys and mixins keys", () => {
@@ -68,15 +67,13 @@ describe("Errors", () => {
         {
           m1: { color: { dark: "#000", light: "#fff" } },
           m2: { color: { dark: "#000", light: "#fff" } },
-       },
-       { delimeter: "_" },
-       () => "light",
-      )(
-        {
-          base_m1: {},
-          base_m2: {},
-        }
-      )
+        },
+        "_",
+        () => "light",
+      )({
+        base_m1: {},
+        base_m2: {},
+      });
     }).toThrow();
   });
   test("Misspeled/unknown mixin suffixes error", () => {
@@ -85,13 +82,11 @@ describe("Errors", () => {
         {
           m1: { color: { dark: "#000", light: "#fff" } },
         },
-        { delimeter: "_" },
+        "_",
         () => "light",
-      )(
-        {
-          base_m3: {},
-        }
-      )
+      )({
+        base_m3: {},
+      });
     }).toThrow();
   });
 });

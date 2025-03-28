@@ -41,7 +41,7 @@ const withMixins = createWithMixins({
   bgi: {backgroundColor: {dark: "#fff", light: "#000"}}, // inverted background
   t: {color: {dark: "#fff", light: "#000"}}, // default text color
   ti: {color: {dark: "#000", light: "#fff"}}, // inverted text color
-}, {delimeter: "_"})
+})
 
 const styles = withMixins(StyleSheet.create({
   container_bg: {
