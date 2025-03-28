@@ -1,4 +1,4 @@
-// src/react-native-style-suffixes/create-with-mixins.ts
+// src/react-native-style-suffixes/create-with-mixins-classes.ts
 import {
   Appearance
 } from "react-native";
@@ -14,38 +14,58 @@ var difference = (variant, base) => {
   return result;
 };
 
-// src/react-native-style-suffixes/create-with-mixins.ts
-var separateKeys = (name, delimeter, mixinKeysSet) => {
-  const [base, ...possibleMixinKeys] = name.split(delimeter);
-  if (!base) {
-    throw new Error("Style suffixes: base could not be empty");
+// src/react-native-style-suffixes/create-with-mixins-classes.ts
+var MixinsContainer = class {
+  constructor(mixins) {
+    this.mixins = mixins;
+    this.mixinKeysSet = new Set(Object.keys(mixins));
   }
-  const possibleMixinKeysSet = new Set(possibleMixinKeys);
-  if (difference(possibleMixinKeysSet, mixinKeysSet).size > 0) {
-    throw new Error("Style suffixes: unknown/misspeled mixin key");
-  } else {
-    return [base, possibleMixinKeys];
+  mixinKeysSet;
+  getMixinKeys() {
+    return this.mixinKeysSet;
+  }
+  getMixins() {
+    return this.mixins;
   }
 };
-var createWithMixinsInternal = (mixins, { delimeter }, getColorScheme = Appearance.getColorScheme) => {
-  const mixinKeysSet = new Set(Object.keys(mixins));
-  return (styles) => {
-    const applicationMap = /* @__PURE__ */ new Map();
+var StylesMixer = class {
+  constructor(mixins, styles, delimeter, getColorScheme) {
+    this.mixins = mixins;
+    this.styles = styles;
     const originalStyleKeys = new Set(
       Object.keys(styles)
     );
     originalStyleKeys.forEach((originalKey) => {
-      const [cleanKey, appliedMixins] = separateKeys(
-        originalKey,
-        delimeter,
-        mixinKeysSet
-      );
-      if (applicationMap.has(cleanKey)) {
+      const [cleanKey, appliedMixins] = this.separateKeys(originalKey);
+      if (this.applicationMap.has(cleanKey)) {
         throw new Error("Style suffixes: duplicating base key");
       }
-      applicationMap.set(cleanKey, [originalKey, appliedMixins]);
+      this.applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
-    const proxyfiedObject = Array.from(applicationMap).reduce(
+    if (delimeter) {
+      this.delimeter = delimeter;
+    }
+    if (getColorScheme) {
+      this.getColorScheme = getColorScheme;
+    }
+  }
+  applicationMap = /* @__PURE__ */ new Map();
+  delimeter = "_";
+  getColorScheme = Appearance.getColorScheme;
+  separateKeys(name) {
+    const [base, ...possibleMixinKeys] = name.split(this.delimeter);
+    if (!base) {
+      throw new Error("Style suffixes: base could not be empty");
+    }
+    const possibleMixinKeysSet = new Set(possibleMixinKeys);
+    if (difference(possibleMixinKeysSet, this.mixins.getMixinKeys()).size > 0) {
+      throw new Error("Style suffixes: unknown/misspeled mixin key");
+    } else {
+      return [base, possibleMixinKeys];
+    }
+  }
+  getMixedStyles() {
+    const proxyfiedObject = Array.from(this.applicationMap).reduce(
       (po, item) => {
         po[item[0]] = null;
         return po;
@@ -54,11 +74,11 @@ var createWithMixinsInternal = (mixins, { delimeter }, getColorScheme = Appearan
     );
     return new Proxy(proxyfiedObject, {
       get: (_t, cleanKey) => {
-        const [originalKey, appliedMixinsKeys] = applicationMap.get(cleanKey);
-        const style = { ...styles[originalKey] };
-        const colorScheme = getColorScheme();
+        const [originalKey, appliedMixinsKeys] = this.applicationMap.get(cleanKey);
+        const style = { ...this.styles[originalKey] };
+        const colorScheme = this.getColorScheme();
         if (colorScheme) {
-          appliedMixinsKeys.map((key) => mixins[key]).reduce((st, mixin) => {
+          appliedMixinsKeys.map((key) => this.mixins.getMixins()[key]).reduce((st, mixin) => {
             return Object.entries(mixin).reduce(
               (styleResult, [styleName, themeVariants]) => {
                 return Object.assign(styleResult, {
@@ -72,8 +92,22 @@ var createWithMixinsInternal = (mixins, { delimeter }, getColorScheme = Appearan
         return style;
       }
     });
+  }
+};
+
+// src/react-native-style-suffixes/index.ts
+var createWithMixins = (mixins, delimeter, getColorScheme) => {
+  const mixinsContainer = new MixinsContainer(mixins);
+  return (styles) => {
+    const styleMixer = new StylesMixer(
+      mixinsContainer,
+      styles,
+      delimeter,
+      getColorScheme
+    );
+    return styleMixer.getMixedStyles();
   };
 };
 export {
-  createWithMixinsInternal as createWithMixins
+  createWithMixins
 };

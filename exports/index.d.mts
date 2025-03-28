@@ -10,8 +10,6 @@ type MixinOfView<ViewType extends object> = {
 type Mixin = MixinOfView<ViewStyle> | MixinOfView<TextStyle> | MixinOfView<ImageStyle>;
 type CleanKeys<Delimeter extends string, MixinKeys extends string, StylesKeys extends string> = StylesKeys extends `${infer IntermediateKeys}${Delimeter}${MixinKeys}` ? CleanKeys<Delimeter, MixinKeys, IntermediateKeys> : StylesKeys;
 
-declare const createWithMixinsInternal: <MixinKeys extends string, Delimeter extends string>(mixins: Record<MixinKeys, Mixin>, { delimeter }: {
-    delimeter: Delimeter;
-}, getColorScheme?: () => ColorSchemeName) => (<RawStyleKeys extends string, StyleValue extends ViewStyle | TextStyle | ImageStyle, CK extends string = CleanKeys<Delimeter, MixinKeys, RawStyleKeys>>(styles: Record<RawStyleKeys, StyleValue>) => Record<CK, StyleProps>);
+declare const createWithMixins: <MixinKeys extends string, Delimeter extends string = "_">(mixins: Record<MixinKeys, Mixin>, delimeter?: Delimeter, getColorScheme?: () => ColorSchemeName) => <RawStyleKeys extends string, StyleValue extends ViewStyle | TextStyle | ImageStyle>(styles: Record<RawStyleKeys, StyleValue>) => Record<CleanKeys<Delimeter, MixinKeys, RawStyleKeys>, StyleProps>;
 
-export { createWithMixinsInternal as createWithMixins };
+export { createWithMixins };
