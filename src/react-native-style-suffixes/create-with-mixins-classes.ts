@@ -40,6 +40,12 @@ export class StylesMixer<
     delimeter?: Delimeter,
     getColorScheme?: () => ColorSchemeName,
   ) {
+    if (delimeter) {
+      this.delimeter = delimeter;
+    }
+    if (getColorScheme) {
+      this.getColorScheme = getColorScheme;
+    }
     const originalStyleKeys = new Set<RawStyleKeys>(
       Object.keys(styles) as RawStyleKeys[],
     );
@@ -51,12 +57,6 @@ export class StylesMixer<
       }
       this.applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
-    if (delimeter) {
-      this.delimeter = delimeter;
-    }
-    if (getColorScheme) {
-      this.getColorScheme = getColorScheme;
-    }
   }
 
   private separateKeys<
