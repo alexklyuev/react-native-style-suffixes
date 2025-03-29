@@ -32,6 +32,12 @@ var StylesMixer = class {
   constructor(mixins, styles, delimeter, getColorScheme) {
     this.mixins = mixins;
     this.styles = styles;
+    if (delimeter) {
+      this.delimeter = delimeter;
+    }
+    if (getColorScheme) {
+      this.getColorScheme = getColorScheme;
+    }
     const originalStyleKeys = new Set(
       Object.keys(styles)
     );
@@ -42,12 +48,6 @@ var StylesMixer = class {
       }
       this.applicationMap.set(cleanKey, [originalKey, appliedMixins]);
     });
-    if (delimeter) {
-      this.delimeter = delimeter;
-    }
-    if (getColorScheme) {
-      this.getColorScheme = getColorScheme;
-    }
   }
   applicationMap = /* @__PURE__ */ new Map();
   delimeter = "_";
